@@ -93,7 +93,7 @@ def main():
     brukarkommandoar = Queue.Queue()
 
     connected = True
-    port = 'COM3'
+    port = 'COM6'
     baud = 115200  # 9600
 
     serieport = serial.Serial(port, baud, timeout=1)
@@ -140,7 +140,7 @@ def main():
     # serieport.close()     # Det er naa kome kommando om aa stoppa logginga
     # print '%s %s'  %(serieport.name, 'er stengt')
 
-    print uC_meldingar
+    #print uC_meldingar
 
     f.write(str(uC_meldingar))
     f.close()
