@@ -93,7 +93,7 @@ def main():
     brukarkommandoar = Queue.Queue()
 
     connected = True
-    port = 'COM6'
+    port = 'COM3'
     baud = 115200  # 9600
 
     serieport = serial.Serial(port, baud, timeout=1)
@@ -281,9 +281,9 @@ def main():
     f, aks_sub = mpl.subplots(4, sharex=True)
     # Plot
     aks_sub[0].plot(tid, AN_IN1)
-    aks_sub[1].plot(tid, AN_IN2)
-    aks_sub[2].plot(tid, CUR_IN1)
-    aks_sub[3].plot(tid, CUR_IN2)
+    aks_sub[1].plot(tid, a_x)
+    aks_sub[2].plot(tid, a_y)
+    aks_sub[3].plot(tid, a_z)
     #aks_sub[4].plot(tid, a_z)
     #aks_sub[5].plot(tid, aks_abs)
 
