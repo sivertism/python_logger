@@ -1,4 +1,4 @@
-__author__ = 'Morten Tengesdal'
+__author__ = 'Morten Tengesdal, Sivert Sliper, Stian Sorensen'
 # Dato:15/7-15
 # Med serieporttraad og med meldingskoe
 # Skriptet loggar akselerasjonsdata i X-, Y- og Z-retning i 16-bitsformat og med
@@ -155,6 +155,12 @@ def main():
     CUR_IN1 = []
     CUR_IN2 = []
 
+# Quaternion lists
+    q0_raw = []
+    q1_raw = []
+    q2_raw = []
+    q3_raw = []
+
     for i in range(0, len(uC_meldingar)):
         if uC_meldingar[i] == 'T':
             tid_raa.append(16 * hexascii2int(uC_meldingar[i + 1]) + hexascii2int(uC_meldingar[i + 2]))
@@ -196,6 +202,28 @@ def main():
                 4096 * hexascii2int(uC_meldingar[i + 1]) + 256 * hexascii2int(uC_meldingar[i + 2]) + 16 * hexascii2int(
                     uC_meldingar[i + 3]) + hexascii2int(uC_meldingar[i + 4]))
 
+        # Quaternions
+        elif uC_meldingar[i] == 'K':
+            # Fiks slik at ein faar fram negative tal.
+            q0_raw.append(
+                4096 * hexascii2int(uC_meldingar[i + 1]) + 256 * hexascii2int(uC_meldingar[i + 2]) + 16 * hexascii2int(
+                    uC_meldingar[i + 3]) + hexascii2int(uC_meldingar[i + 4]))
+        elif uC_meldingar[i] == 'L':
+            # Fiks slik at ein faar fram negative tal.
+            q1_raw.append(
+                4096 * hexascii2int(uC_meldingar[i + 1]) + 256 * hexascii2int(uC_meldingar[i + 2]) + 16 * hexascii2int(
+                    uC_meldingar[i + 3]) + hexascii2int(uC_meldingar[i + 4]))
+        elif uC_meldingar[i] == 'M':
+            # Fiks slik at ein faar fram negative tal.
+            q2_raw.append(
+                4096 * hexascii2int(uC_meldingar[i + 1]) + 256 * hexascii2int(uC_meldingar[i + 2]) + 16 * hexascii2int(
+                    uC_meldingar[i + 3]) + hexascii2int(uC_meldingar[i + 4])) 
+        elif uC_meldingar[i] == 'N':
+            # Fiks slik at ein faar fram negative tal.
+            q3_raw.append(
+                4096 * hexascii2int(uC_meldingar[i + 1]) + 256 * hexascii2int(uC_meldingar[i + 2]) + 16 * hexascii2int(
+                    uC_meldingar[i + 3]) + hexascii2int(uC_meldingar[i + 4]))    
+
     # Lag skalerte lister og rekna ut tilleggsvariablar.
     a_x = []
     a_y = []
@@ -205,6 +233,46 @@ def main():
     ayz_abs = []
     rull = []     # rullvinkel psi i grader (om x-aksen)
     stamp = []    # stampvinkel theta i grader (om y-aksen)
+
+    # Euler angle lists
+    q0 = []
+    q1 = []
+    q2 = []
+    q3 = []
+
+    yaw = []
+    pitch = []
+    roll = []
+
+    for i in range(0, len(q0_raw)):
+        if q0_raw[i] >= 32768: # Tallet er negativt, trekk fra 65536 for aa faa riktig fortegn.
+            q0.append((float(q0_raw[i])-65536.0)/10000.0)  # 1mg pr. LSb iflg. databladet.
+        else: # Tallet er positivt
+            q0.append(float(q0_raw[i])/10000.0)
+
+    for i in range(0, len(q1_raw)):
+        if q1_raw[i] >= 32768: # Tallet er negativt, trekk fra 65536 for aa faa riktig fortegn.
+            q1.append((float(q1_raw[i])-65536.0)/10000.0)  # 1mg pr. LSb iflg. databladet.
+        else: # Tallet er positivt
+            q1.append(float(q1_raw[i])/10000.0)
+
+    for i in range(0, len(q2_raw)):
+        if q2_raw[i] >= 32768: # Tallet er negativt, trekk fra 65536 for aa faa riktig fortegn.
+            q2.append((float(q2_raw[i])-65536.0)/10000.0)  # 1mg pr. LSb iflg. databladet.
+        else: # Tallet er positivt
+            q2.append(float(q2_raw[i])/10000.0)
+
+    for i in range(0, len(q3_raw)):
+        if q3_raw[i] >= 32768: # Tallet er negativt, trekk fra 65536 for aa faa riktig fortegn.
+            q3.append((float(q3_raw[i])-65536.0)/10000.0)  # 1mg pr. LSb iflg. databladet.
+        else: # Tallet er positivt
+            q3.append(float(q3_raw[i])/10000.0)
+
+    for i in range(0, len(q0)):
+        roll.append( np.arctan2(2*(q0[i]*q1[i] + q2[i]*q3[i]), q0[i]**2 - q1[i]**2 - q2[i]**2 + q3[i]**2) )
+        pitch.append( -np.arcsin(2(q1[i]*q3[i] - q0[i]*q2[i])) )
+        yaw.append( np.arctan2(2*(q0[i]*q1[i] + q2[i]*q3[i]), q0[i]**2 + q1[i]**2 - q2[i]**2 - q3[i]**2) )
+
 
     for i in range(0, len(a_x_raa)):
         if a_x_raa[i] >= 32768: # Tallet er negativt, trekk fra 65536 for aa faa riktig fortegn.
@@ -246,6 +314,8 @@ def main():
         else:
             rull.append(np.arctan2(a_y[i], a_z[i]) * 180 / np.pi)
 
+
+
     # Skal laga ei kontinuerleg aukande tidsliste som startar i null.
     tid = []
     Ts = 0.1  # Sampleintervall i sekund
@@ -281,25 +351,25 @@ def main():
     f, aks_sub = mpl.subplots(4, sharex=True)
     # Plot
     aks_sub[0].plot(tid, AN_IN1)
-    aks_sub[1].plot(tid, a_x)
-    aks_sub[2].plot(tid, a_y)
-    aks_sub[3].plot(tid, a_z)
+    aks_sub[1].plot(tid, roll)
+    aks_sub[2].plot(tid, pitch)
+    aks_sub[3].plot(tid, yaw)
     #aks_sub[4].plot(tid, a_z)
     #aks_sub[5].plot(tid, aks_abs)
 
     # Tittel
     aks_sub[0].set_title('AN_IN1')
-    aks_sub[1].set_title('AN_IN2')
-    aks_sub[2].set_title('CUR_IN1')
-    aks_sub[3].set_title('CUR_IN2')
+    aks_sub[1].set_title('roll')
+    aks_sub[2].set_title('pitch')
+    aks_sub[3].set_title('yaw')
     #aks_sub[4].set_title('Avvik fra oensket avstand')
     #aks_sub[5].set_title('Absolutt akselerasjon')
 
     # Aksenavn
     aks_sub[0].set_ylabel('Spenning [x100 uV]')
-    aks_sub[1].set_ylabel('Spenning [x100 uV]')
-    aks_sub[2].set_ylabel('Spenning [x100 uV]')
-    aks_sub[3].set_ylabel('Spenning [x100 uV]')
+    aks_sub[1].set_ylabel('Radians')
+    aks_sub[2].set_ylabel('Radians')
+    aks_sub[3].set_ylabel('Radians')
     #aks_sub[5].set_ylabel('Aks. [g]')
 
     # Grid
