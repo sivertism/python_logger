@@ -273,10 +273,24 @@ def main():
         #pitch.append( (-np.arcsin(2*(q1[i]*q3[i] - q0[i]*q2[i]))) )
         #yaw.append( np.arctan2(2*(q0[i]*q1[i] + q2[i]*q3[i]), q0[i]**2 + q1[i]**2 - q2[i]**2 - q3[i]**2) )
 
-        yaw.append( np.arctan2(2*q1[i]*q2[i] - 2*q0[i]*q3[i], 2*q0[i]*q0[i]+2*q1[i]*q1[i]-1)) #heading, yaw, phi
-        pitch.append( -np.arcsin(2*q1[i]*q3[i]+2*q0[i]*q2[i])) # attitude, elevation, pitch, theta
-        roll.append( np.arctan2(2*q2[i]*q3[i]-2*q0[i]*q1[i], 2*q0[i]*q0[i]+2*q3[i]*q3[i]-1)) # bank, roll, psi*/
-
+        #yaw.append( np.arctan2(2*q1[i]*q2[i] - 2*q0[i]*q3[i], 2*q0[i]*q0[i]+2*q1[i]*q1[i]-1)) #heading, yaw, phi
+        #pitch.append( -np.arcsin(2*q1[i]*q3[i]+2*q0[i]*q2[i])) # attitude, elevation, pitch, theta
+        #roll.append( np.arctan2(2*q2[i]*q3[i]-2*q0[i]*q1[i], 2*q0[i]*q0[i]+2*q3[i]*q3[i]-1)) # bank, roll, psi*/
+        test = q1[i]*q2[i]+q3[i]*q0[i];
+        if test > 0.499: 
+            yaw.append(2*np.arctan2(q1[i], q0[i])*180/np.pi)
+            pitch.append(np.pi*180/(2*np.pi))
+            roll.append(0)
+        elif test< -0.499:
+            yaw.append(-2*np.arctan2(q1[i], q0[i])*180/np.pi)
+            pitch.append(-np.pi*180/(2*np.pi))
+            roll.append(0)
+        else:
+            yaw.append(np.arctan2(2*q2[i]*q0[i] - 2*q1[i]*q3[i], 1 - 2*q2[i]*q2[i] - 2*q3[i]*q3[i])*180/np.pi)
+            pitch.append(np.arcsin(2*q1[i]*q2[i] + 2*q3[i]*q0[i])*180/np.pi)
+            roll.append(np.arctan2(2*q1[i]*q0[i] - 2*q2[i]*q3[i], 1 - 2*q1[i]*q1[i] - 2*q3[i]*q3[i])*180/np.pi)
+          
+        
 
     for i in range(0, len(a_x_raa)):
         if a_x_raa[i] >= 32768: # Tallet er negativt, trekk fra 65536 for aa faa riktig fortegn.
