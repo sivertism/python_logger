@@ -269,9 +269,13 @@ def main():
             q3.append(float(q3_raw[i])/10000.0)
 
     for i in range(0, len(q0)):
-        roll.append( np.arctan2(2*(q0[i]*q1[i] + q2[i]*q3[i]), q0[i]**2 - q1[i]**2 - q2[i]**2 + q3[i]**2) )
-        pitch.append( -np.arcsin(2(q1[i]*q3[i] - q0[i]*q2[i])) )
-        yaw.append( np.arctan2(2*(q0[i]*q1[i] + q2[i]*q3[i]), q0[i]**2 + q1[i]**2 - q2[i]**2 - q3[i]**2) )
+        #roll.append( np.arctan2(2*(q0[i]*q1[i] + q2[i]*q3[i]), q0[i]**2 - q1[i]**2 - q2[i]**2 + q3[i]**2) )
+        #pitch.append( (-np.arcsin(2*(q1[i]*q3[i] - q0[i]*q2[i]))) )
+        #yaw.append( np.arctan2(2*(q0[i]*q1[i] + q2[i]*q3[i]), q0[i]**2 + q1[i]**2 - q2[i]**2 - q3[i]**2) )
+
+        yaw.append( np.arctan2(2*q1[i]*q2[i] - 2*q0[i]*q3[i], 2*q0[i]*q0[i]+2*q1[i]*q1[i]-1)) #heading, yaw, phi
+        pitch.append( -np.arcsin(2*q1[i]*q3[i]+2*q0[i]*q2[i])) # attitude, elevation, pitch, theta
+        roll.append( np.arctan2(2*q2[i]*q3[i]-2*q0[i]*q1[i], 2*q0[i]*q0[i]+2*q3[i]*q3[i]-1)) # bank, roll, psi*/
 
 
     for i in range(0, len(a_x_raa)):
@@ -282,15 +286,15 @@ def main():
 
     for i in range(0, len(a_y_raa)):
         if a_y_raa[i] >= 32768:
-            a_y.append((float(a_y_raa[i])-65536.0))
+            a_y.append((float(a_y_raa[i])-65536.0)/1000.0)
         else:
-            a_y.append(float(a_y_raa[i]))
+            a_y.append(float(a_y_raa[i])/1000.0)
 
     for i in range(0, len(a_z_raa)):
         if a_z_raa[i] >= 32768:
-            a_z.append((float(a_z_raa[i])-65536.0))
+            a_z.append((float(a_z_raa[i])-65536.0)/1000.0)
         else:
-            a_z.append(float(a_z_raa[i]))
+            a_z.append(float(a_z_raa[i])/1000.0)
 
 
     # Absolutt akselerasjon-utregning.
@@ -348,37 +352,40 @@ def main():
  #    print len(a_x)
 
     # Seks subplott med felles tidsakse.
-    f, aks_sub = mpl.subplots(4, sharex=True)
+    f, aks_sub = mpl.subplots(6, sharex=True)
     # Plot
-    aks_sub[0].plot(tid, AN_IN1)
-    aks_sub[1].plot(tid, roll)
-    aks_sub[2].plot(tid, pitch)
-    aks_sub[3].plot(tid, yaw)
+    aks_sub[0].plot(tid, roll)
+    aks_sub[1].plot(tid, pitch)
+    aks_sub[2].plot(tid, yaw)
+    aks_sub[3].plot(tid, a_x)
+    aks_sub[4].plot(tid, a_y)
+    aks_sub[5].plot(tid, a_z)
+    #aks_sub[3].plot(tid, yaw)
     #aks_sub[4].plot(tid, a_z)
     #aks_sub[5].plot(tid, aks_abs)
 
     # Tittel
-    aks_sub[0].set_title('AN_IN1')
-    aks_sub[1].set_title('roll')
-    aks_sub[2].set_title('pitch')
-    aks_sub[3].set_title('yaw')
-    #aks_sub[4].set_title('Avvik fra oensket avstand')
-    #aks_sub[5].set_title('Absolutt akselerasjon')
+    aks_sub[0].set_title('roll')
+    aks_sub[1].set_title('pitch')
+    aks_sub[2].set_title('yaw')
+    aks_sub[3].set_title('Gyro x')
+    aks_sub[4].set_title('Gyro y')
+    aks_sub[5].set_title('Gyro z')
 
     # Aksenavn
-    aks_sub[0].set_ylabel('Spenning [x100 uV]')
+    aks_sub[0].set_ylabel('Radians')
     aks_sub[1].set_ylabel('Radians')
     aks_sub[2].set_ylabel('Radians')
     aks_sub[3].set_ylabel('Radians')
-    #aks_sub[5].set_ylabel('Aks. [g]')
+    aks_sub[5].set_ylabel('Radians')
 
     # Grid
     aks_sub[0].grid()
     aks_sub[1].grid()
     aks_sub[2].grid()
     aks_sub[3].grid()
-    #aks_sub[4].grid()
-    #aks_sub[5].grid()
+    aks_sub[4].grid()
+    aks_sub[5].grid()
 
     mpl.show()
 
