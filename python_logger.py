@@ -336,7 +336,7 @@ def main():
 
     # Skal laga ei kontinuerleg aukande tidsliste som startar i null.
     tid = []
-    Ts = 0.1  # Sampleintervall i sekund
+    Ts = 0.01  # Sampleintervall i sekund
     tidsomloepnr = 0
 
     for j in range(0, len(tid_raa)):
@@ -387,11 +387,11 @@ def main():
     aks_sub[5].set_title('Gyro z')
 
     # Aksenavn
-    aks_sub[0].set_ylabel('Radians')
-    aks_sub[1].set_ylabel('Radians')
-    aks_sub[2].set_ylabel('Radians')
-    aks_sub[3].set_ylabel('Radians')
-    aks_sub[5].set_ylabel('Radians')
+    aks_sub[0].set_ylabel('Degrees')
+    aks_sub[1].set_ylabel('Degrees')
+    aks_sub[2].set_ylabel('DPS')
+    aks_sub[3].set_ylabel('DPS')
+    aks_sub[5].set_ylabel('DPS')
 
     # Grid
     aks_sub[0].grid()
